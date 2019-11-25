@@ -2,32 +2,31 @@
 extern crate clap;
 extern crate gpx;
 
-use std::io::{self, BufReader};
-use std::fs::File;
 use std::cmp::Ordering::Equal;
+use std::fs::File;
+use std::io::{self, BufReader};
 
-use clap::{App, Arg};
+use clap::Arg;
 
 use gpx::read;
 use gpx::{Gpx, Track, TrackSegment};
 
-use tui::Terminal;
-use tui::backend::TermionBackend;
-use tui::style::Color;
-use tui::widgets::{Widget, Block, Borders};
-use tui::widgets::canvas::{Canvas, Map, MapResolution};
-use tui::layout::{Layout, Constraint, Direction};
 use termion::raw::IntoRawMode;
+use tui::backend::TermionBackend;
+use tui::layout::{Constraint, Direction, Layout};
+use tui::style::Color;
+use tui::widgets::canvas::{Canvas, Map, MapResolution};
+use tui::widgets::{Block, Borders, Widget};
+use tui::Terminal;
 
 fn main() -> Result<(), std::io::Error> {
-    let matches = App::new(crate_name!())
-        .author(crate_authors!("\n"))
-        .version(crate_version!())
-        .about(crate_description!())
-        .arg(Arg::with_name("INPUT")
-                               .help("Sets the input file to use")
-                               .required(true)
-                               .index(1))
+    let matches = app_from_crate!()
+        .arg(
+            Arg::with_name("INPUT")
+                .help("Sets the input file to use")
+                .required(true)
+                .index(1),
+        )
         .get_matches();
 
     let input_file = matches.value_of("INPUT").unwrap_or("example.gpx");
@@ -39,12 +38,31 @@ fn main() -> Result<(), std::io::Error> {
     let segment: &TrackSegment = &track.segments[0];
     let points = &segment.points;
 
-    let collected: Vec<(f64, f64)> = points.iter().map(|p| (p.point().x(), p.point().y())).collect();
+    let collected: Vec<(f64, f64)> = points
+        .iter()
+        .map(|p| (p.point().x(), p.point().y()))
+        .collect();
 
-    let min_x = collected.iter().min_by(|p1, p2| p1.0.partial_cmp(&p2.0).unwrap_or(Equal)).unwrap().0;
-    let max_x = collected.iter().max_by(|p1, p2| p1.0.partial_cmp(&p2.0).unwrap_or(Equal)).unwrap().0;
-    let min_y = collected.iter().min_by(|p1, p2| p1.1.partial_cmp(&p2.1).unwrap_or(Equal)).unwrap().1;
-    let max_y = collected.iter().max_by(|p1, p2| p1.1.partial_cmp(&p2.1).unwrap_or(Equal)).unwrap().1;
+    let min_x = collected
+        .iter()
+        .min_by(|p1, p2| p1.0.partial_cmp(&p2.0).unwrap_or(Equal))
+        .unwrap()
+        .0;
+    let max_x = collected
+        .iter()
+        .max_by(|p1, p2| p1.0.partial_cmp(&p2.0).unwrap_or(Equal))
+        .unwrap()
+        .0;
+    let min_y = collected
+        .iter()
+        .min_by(|p1, p2| p1.1.partial_cmp(&p2.1).unwrap_or(Equal))
+        .unwrap()
+        .1;
+    let max_y = collected
+        .iter()
+        .max_by(|p1, p2| p1.1.partial_cmp(&p2.1).unwrap_or(Equal))
+        .unwrap()
+        .1;
 
     let stdout = io::stdout().into_raw_mode()?;
     let backend = TermionBackend::new(stdout);
