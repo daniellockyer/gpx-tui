@@ -13,7 +13,7 @@ edition = "2018"
 
 [dependencies]
 gpx = "0.7"
-tui = "0.8"
+tui = "0.9"
 termion = "1.5"
 
 [dependencies.clap]
